@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000px" height="510px" font-family="ConsolasFallback,Consolas,'SF Mono',Menlo,'DejaVu Sans Mono',monospace" font-size="16px">
+<style>
+@font-face {src: local('Consolas'); font-family: 'ConsolasFallback'; size-adjust: 109%;}
+.text {fill: #24292f;} .key {fill: #953800;} .value {fill: #0a3069;}
+.dots {fill: #c2cfde;} .good {fill: #1a7f37;}
+text, tspan {white-space: pre;}
+</style>
+<rect width="1000px" height="510px" fill="#f6f8fa" rx="15"/>
+<text class="text" x="15" y="30">
+<tspan x="15" y="30">                  ili    !!</tspan>
+<tspan x="15" y="50">          |;,,:,`&#x27;..&#x27;,,&#x27;....!</tspan>
+<tspan x="15" y="70">         ,`,,`,`&#x27;`&#x27;..&#x27;&#x27;...&#x27;&#x27;.|</tspan>
+<tspan x="15" y="90">        `,,,,`````,````&#x27;......</tspan>
+<tspan x="15" y="110">       &#x27;&#x27;`,,```,,,,`,:,,&#x27;......;</tspan>
+<tspan x="15" y="130">      `.```,``&#x27;&#x27;```&#x27;.&#x27;&#x27;&#x27;&#x27;.......`</tspan>
+<tspan x="15" y="150">      `&#x27;&#x27;&#x27;&#x27;,`.&#x27;&#x27;````..............</tspan>
+<tspan x="15" y="170">      ,&#x27;&#x27;&#x27;`,`&#x27;`,`.&#x27;&#x27;..............:</tspan>
+<tspan x="15" y="190">      ,``&#x27;,,```::,:,&#x27;&#x27;&#x27;...........,</tspan>
+<tspan x="15" y="210">      !::`,;iljjjl||ili|!;:,`......</tspan>
+<tspan x="15" y="230">       :!m|jmrMHNMnnrrrrnkl!,.....,</tspan>
+<tspan x="15" y="250">      H*jNrnmjijkMNHwn*lli!:`&#x27;....`</tspan>
+<tspan x="15" y="270">      @Hw@NMMm*kmM%@j`;k*|i,&#x27;&#x27;..&#x27;`</tspan>
+<tspan x="15" y="290">     rNMH%@@%%NNNN%%j`:krkl:,`&#x27;&#x27;`</tspan>
+<tspan x="15" y="310">      NHH%@@@%NN%%%Nj`,|*nmj:&#x27;&#x27;.|</tspan>
+<tspan x="15" y="330">      rwrwH%%HMMHH%Nj,`:*mk|,&#x27;.&#x27;</tspan>
+<tspan x="15" y="350">        knnrnmrHHMMri::inrk;&#x27;.`l</tspan>
+<tspan x="15" y="370">         kmmkjj*knmk*|;|mrk:`</tspan>
+<tspan x="15" y="390">         j*kmnmkknk*l;``kr!`</tspan>
+<tspan x="15" y="410">     li!|*mj*rrnnnkkj!,!j;.|</tspan>
+<tspan x="15" y="430">;,&#x27;..&#x27;`lnnrn*knrrnm*i||!&#x27;..`;</tspan>
+<tspan x="15" y="450">.....&#x27;.lrnwwrmkk**l|!;`........&#x27;:!</tspan>
+<tspan x="15" y="470">&#x27;.&#x27;....&#x27;jrrwwrnkji!:`...............</tspan>
+<tspan x="15" y="490">.........imnrrrwml!`................</tspan>
+</text>
+<text class="text" x="395" y="30">
+<tspan x="395" y="30"><tspan class="text">aakarshit@verma --------------------------------------------</tspan></tspan>
+<tspan x="395" y="50"><tspan class="dots">. </tspan><tspan class="key">OS</tspan><tspan class="text">:</tspan><tspan class="dots"> ................................................ </tspan><tspan class="value">macOS</tspan></tspan>
+<tspan x="395" y="70"><tspan class="dots">. </tspan><tspan class="key">Uptime</tspan><tspan class="text">:</tspan><tspan class="dots"> ........................ </tspan><tspan class="value">5 years, 3 months, 0 days</tspan></tspan>
+<tspan x="395" y="90"><tspan class="dots">. </tspan><tspan class="key">Host</tspan><tspan class="text">:</tspan><tspan class="dots"> ............................ </tspan><tspan class="value">Open Source / GSoC 2026</tspan></tspan>
+<tspan x="395" y="110"><tspan class="dots">. </tspan><tspan class="key">Kernel</tspan><tspan class="text">:</tspan><tspan class="dots"> ................................ </tspan><tspan class="value">Student Developer</tspan></tspan>
+<tspan x="395" y="130"><tspan class="dots">. </tspan><tspan class="key">IDE</tspan><tspan class="text">:</tspan><tspan class="dots"> ........................................ </tspan><tspan class="value">VS Code, Zed</tspan></tspan>
+<tspan x="395" y="150"><tspan class="dots">.</tspan></tspan>
+<tspan x="395" y="170"><tspan class="dots">. </tspan><tspan class="key">Languages</tspan><tspan class="text">.</tspan><tspan class="key">Programming</tspan><tspan class="text">:</tspan><tspan class="dots"> .. </tspan><tspan class="value">TypeScript, Rust, Python, Kotlin</tspan></tspan>
+<tspan x="395" y="190"><tspan class="dots">. </tspan><tspan class="key">Languages</tspan><tspan class="text">.</tspan><tspan class="key">Real</tspan><tspan class="text">:</tspan><tspan class="dots"> ........................... </tspan><tspan class="value">English, Hindi</tspan></tspan>
+<tspan x="395" y="210"><tspan class="dots">.</tspan></tspan>
+<tspan x="395" y="230"><tspan class="dots">. </tspan><tspan class="key">Contributing</tspan><tspan class="text">.</tspan><tspan class="key">To</tspan><tspan class="text">:</tspan><tspan class="dots"> ...... </tspan><tspan class="value">Effect, nushell, uutils, Kiwix, iD</tspan></tspan>
+<tspan x="395" y="250"><tspan class="dots">. </tspan><tspan class="key">Hobbies</tspan><tspan class="text">:</tspan><tspan class="dots"> .......................... </tspan><tspan class="value">Open source, CLI tools</tspan></tspan>
+<tspan x="395" y="290"><tspan class="text">- Contact --------------------------------------------------</tspan></tspan>
+<tspan x="395" y="310"><tspan class="dots">. </tspan><tspan class="key">GitHub</tspan><tspan class="text">:</tspan><tspan class="dots"> ....................................... </tspan><tspan class="value">aakarshitv</tspan></tspan>
+<tspan x="395" y="350"><tspan class="text">- GitHub Stats ---------------------------------------------</tspan></tspan>
+<tspan x="395" y="370"><tspan class="dots">. </tspan><tspan class="key">Repos</tspan><tspan class="text">:</tspan><tspan class="dots"> .......................... </tspan><tspan class="value">2</tspan><tspan class="text"> | </tspan><tspan class="key">Stars</tspan><tspan class="text">:</tspan><tspan class="dots"> ........... </tspan><tspan class="value">0</tspan></tspan>
+<tspan x="395" y="390"><tspan class="dots">. </tspan><tspan class="key">Contributions</tspan><tspan class="text">:</tspan><tspan class="dots"> ................. </tspan><tspan class="value">61</tspan><tspan class="text"> | </tspan><tspan class="key">Followers</tspan><tspan class="text">:</tspan><tspan class="dots"> ....... </tspan><tspan class="value">0</tspan></tspan>
+<tspan x="395" y="410"><tspan class="dots">. </tspan><tspan class="key">Upstream</tspan><tspan class="text">.</tspan><tspan class="key">PRs</tspan><tspan class="text">:</tspan><tspan class="dots"> .... </tspan><tspan class="value">3 merged, 8 open</tspan><tspan class="text"> | </tspan><tspan class="key">Projects</tspan><tspan class="text">:</tspan><tspan class="dots"> ....... </tspan><tspan class="value">10</tspan></tspan>
+</text>
+</svg>
