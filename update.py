@@ -7,6 +7,7 @@ can be re-rendered offline after editing the static fields below.
 import datetime as dt
 import json
 import os
+import time
 import urllib.request
 from html import escape
 from pathlib import Path
@@ -42,9 +43,9 @@ STAT_W = 20  # width of the right-hand pair on two-pair stat rows
 
 THEMES = {
     "dark": dict(bg="#161b22", text="#c9d1d9", key="#ffa657", value="#a5d6ff",
-                 dots="#616e7f", good="#3fb950"),
+                 dots="#616e7f", good="#3fb950", bad="#f85149"),
     "light": dict(bg="#f6f8fa", text="#24292f", key="#953800", value="#0a3069",
-                  dots="#c2cfde", good="#1a7f37"),
+                  dots="#c2cfde", good="#1a7f37", bad="#cf222e"),
 }
 
 
@@ -62,6 +63,28 @@ def graphql(query, **variables):
     return body["data"]
 
 
+def own_repo_loc(repo):
+    """(added, deleted) lines by USER on a repo's default branch."""
+    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
+    req = urllib.request.Request(
+        f"https://api.github.com/repos/{USER}/{repo}/stats/contributors",
+        headers={"Authorization": f"bearer {token}"},
+    )
+    # GitHub computes these stats lazily and answers 202 until they're ready.
+    for _ in range(10):
+        with urllib.request.urlopen(req) as resp:
+            if resp.status == 200:
+                for author in json.load(resp):
+                    if (author.get("author") or {}).get("login", "").lower() == USER.lower():
+                        return (sum(w["a"] for w in author["weeks"]),
+                                sum(w["d"] for w in author["weeks"]))
+                return 0, 0
+            if resp.status == 204:  # empty repo
+                return 0, 0
+        time.sleep(3)
+    raise RuntimeError(f"contributor stats for {repo} never became ready")
+
+
 def fetch_stats():
     user = graphql(
         """query($login: String!) {
@@ -70,7 +93,7 @@ def fetch_stats():
             followers { totalCount }
             repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC, isFork: false) {
               totalCount
-              nodes { stargazerCount }
+              nodes { name stargazerCount }
             }
           }
         }""",
@@ -95,8 +118,12 @@ def fetch_stats():
         )["user"]["contributionsCollection"]["contributionCalendar"]["totalContributions"]
         start = end
 
-    merged_repos, merged = upstream_prs("is:merged")
-    open_repos, opened = upstream_prs("is:open")
+    merged_repos, merged, added, deleted = upstream_prs("is:merged")
+    open_repos, opened, _, _ = upstream_prs("is:open")
+    # Lines of code: own repos plus upstream PRs that actually landed.
+    for repo in user["repositories"]["nodes"]:
+        a, d = own_repo_loc(repo["name"])
+        added, deleted = added + a, deleted + d
     return {
         "created": user["createdAt"],
         "repos": user["repositories"]["totalCount"],
@@ -106,27 +133,32 @@ def fetch_stats():
         "prs_merged": merged,
         "prs_open": opened,
         "projects": len(merged_repos | open_repos),
+        "loc_added": added,
+        "loc_deleted": deleted,
     }
 
 
 def upstream_prs(state):
-    """PRs to repositories owned by someone else: (set of repos, count)."""
-    repos, cursor, count = set(), None, 0
+    """PRs to repositories owned by someone else: (repos, count, added, deleted)."""
+    repos, cursor, count, added, deleted = set(), None, 0, 0, 0
     while True:
         search = graphql(
             """query($q: String!, $cursor: String) {
               search(query: $q, type: ISSUE, first: 100, after: $cursor) {
                 issueCount
-                nodes { ... on PullRequest { repository { nameWithOwner } } }
+                nodes { ... on PullRequest { additions deletions repository { nameWithOwner } } }
                 pageInfo { hasNextPage endCursor }
               }
             }""",
             q=f"author:{USER} is:pr {state} -user:{USER}", cursor=cursor,
         )["search"]
         count = search["issueCount"]
-        repos |= {n["repository"]["nameWithOwner"] for n in search["nodes"] if n}
+        nodes = [n for n in search["nodes"] if n]
+        repos |= {n["repository"]["nameWithOwner"] for n in nodes}
+        added += sum(n["additions"] for n in nodes)
+        deleted += sum(n["deletions"] for n in nodes)
         if not search["pageInfo"]["hasNextPage"]:
-            return repos, count
+            return repos, count, added, deleted
         cursor = search["pageInfo"]["endCursor"]
 
 
@@ -172,6 +204,15 @@ def row(*pairs):
     return spans
 
 
+def loc_row(added, deleted):
+    """'Lines of Code: .... net ( added++, deleted-- )', coloured like a diff."""
+    tail = [("text", " ( "), ("good", f"{added:,}++"), ("text", ", "),
+            ("bad", f"{deleted:,}--"), ("text", " )")]
+    spans = pair("Lines of Code", f"{added - deleted:,}",
+                 WIDTH_CHARS - 2 - sum(len(t) for _, t in tail))
+    return [("dots", ". ")] + spans + tail
+
+
 def heading(title):
     return [("text", title + " " + "-" * (WIDTH_CHARS - len(title) - 1))]
 
@@ -194,6 +235,7 @@ def build_lines(stats):
     lines.append(row(("Contributions", n("contributions")), ("Followers", n("followers"))))
     lines.append(row(("Upstream.PRs", f"{n('prs_merged')} merged, {n('prs_open')} open"),
                      ("Projects", n("projects"))))
+    lines.append(loc_row(stats.get("loc_added", 0), stats.get("loc_deleted", 0)))
     return lines
 
 
@@ -220,7 +262,7 @@ def render(theme, stats):
         # dot-justified columns line up the same on every OS.
         "@font-face {src: local('Consolas'); font-family: 'ConsolasFallback'; size-adjust: 109%;}",
         f".text {{fill: {c['text']};}} .key {{fill: {c['key']};}} .value {{fill: {c['value']};}}",
-        f".dots {{fill: {c['dots']};}} .good {{fill: {c['good']};}}",
+        f".dots {{fill: {c['dots']};}} .good {{fill: {c['good']};}} .bad {{fill: {c['bad']};}}",
         "text, tspan {white-space: pre;}",
         "</style>",
         f'<rect width="{width}px" height="{height}px" fill="{c["bg"]}" rx="15"/>',

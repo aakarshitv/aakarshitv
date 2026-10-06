@@ -3,8 +3,10 @@
   "repos": 3,
   "stars": 0,
   "followers": 0,
-  "contributions": 74,
+  "contributions": 75,
   "prs_merged": 3,
-  "prs_open": 7,
-  "projects": 8
+  "prs_open": 8,
+  "projects": 9,
+  "loc_added": 1194,
+  "loc_deleted": 86
 }
