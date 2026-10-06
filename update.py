@@ -64,14 +64,15 @@ def graphql(query, **variables):
 
 
 def own_repo_loc(repo):
-    """(added, deleted) lines by USER on a repo's default branch."""
+    """(added, deleted) lines by USER on a repo's default branch, or None if
+    GitHub is still computing the stats."""
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     req = urllib.request.Request(
         f"https://api.github.com/repos/{USER}/{repo}/stats/contributors",
         headers={"Authorization": f"bearer {token}"},
     )
     # GitHub computes these stats lazily and answers 202 until they're ready.
-    for _ in range(10):
+    for _ in range(12):
         with urllib.request.urlopen(req) as resp:
             if resp.status == 200:
                 for author in json.load(resp):
@@ -81,8 +82,8 @@ def own_repo_loc(repo):
                 return 0, 0
             if resp.status == 204:  # empty repo
                 return 0, 0
-        time.sleep(3)
-    raise RuntimeError(f"contributor stats for {repo} never became ready")
+        time.sleep(5)
+    return None
 
 
 def fetch_stats():
@@ -121,9 +122,14 @@ def fetch_stats():
     merged_repos, merged, added, deleted = upstream_prs("is:merged")
     open_repos, opened, _, _ = upstream_prs("is:open")
     # Lines of code: own repos plus upstream PRs that actually landed.
-    for repo in user["repositories"]["nodes"]:
-        a, d = own_repo_loc(repo["name"])
-        added, deleted = added + a, deleted + d
+    own = [own_repo_loc(repo["name"]) for repo in user["repositories"]["nodes"]]
+    if None in own:
+        # Stats not ready (common right after a push): keep the last totals.
+        old = json.loads((ROOT / "stats.json").read_text())
+        added, deleted = old.get("loc_added", added), old.get("loc_deleted", deleted)
+    else:
+        added += sum(a for a, _ in own)
+        deleted += sum(d for _, d in own)
     return {
         "created": user["createdAt"],
         "repos": user["repositories"]["totalCount"],
