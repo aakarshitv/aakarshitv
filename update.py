@@ -7,7 +7,6 @@ can be re-rendered offline after editing the static fields below.
 import datetime as dt
 import json
 import os
-import time
 import urllib.request
 from html import escape
 from pathlib import Path
@@ -63,33 +62,42 @@ def graphql(query, **variables):
     return body["data"]
 
 
-def own_repo_loc(repo):
-    """(added, deleted) lines by USER on a repo's default branch, or None if
-    GitHub is still computing the stats."""
-    token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
-    req = urllib.request.Request(
-        f"https://api.github.com/repos/{USER}/{repo}/stats/contributors",
-        headers={"Authorization": f"bearer {token}"},
-    )
-    # GitHub computes these stats lazily and answers 202 until they're ready.
-    for _ in range(12):
-        with urllib.request.urlopen(req) as resp:
-            if resp.status == 200:
-                for author in json.load(resp):
-                    if (author.get("author") or {}).get("login", "").lower() == USER.lower():
-                        return (sum(w["a"] for w in author["weeks"]),
-                                sum(w["d"] for w in author["weeks"]))
-                return 0, 0
-            if resp.status == 204:  # empty repo
-                return 0, 0
-        time.sleep(5)
-    return None
+def own_repo_loc(repo, user_id):
+    """(added, deleted) lines in USER's commits on a repo's default branch.
+    Merge commits are skipped so merged PRs aren't counted twice."""
+    added = deleted = 0
+    cursor = None
+    while True:
+        ref = graphql(
+            """query($owner: String!, $name: String!, $uid: ID!, $cursor: String) {
+              repository(owner: $owner, name: $name) {
+                defaultBranchRef { target { ... on Commit {
+                  history(first: 100, after: $cursor, author: {id: $uid}) {
+                    nodes { additions deletions parents { totalCount } }
+                    pageInfo { hasNextPage endCursor }
+                  }
+                } } }
+              }
+            }""",
+            owner=USER, name=repo, uid=user_id, cursor=cursor,
+        )["repository"]["defaultBranchRef"]
+        if ref is None:  # empty repo
+            return added, deleted
+        history = ref["target"]["history"]
+        for c in history["nodes"]:
+            if c["parents"]["totalCount"] < 2:
+                added += c["additions"]
+                deleted += c["deletions"]
+        if not history["pageInfo"]["hasNextPage"]:
+            return added, deleted
+        cursor = history["pageInfo"]["endCursor"]
 
 
 def fetch_stats():
     user = graphql(
         """query($login: String!) {
           user(login: $login) {
+            id
             createdAt
             followers { totalCount }
             repositories(first: 100, ownerAffiliations: OWNER, privacy: PUBLIC, isFork: false) {
@@ -122,14 +130,9 @@ def fetch_stats():
     merged_repos, merged, added, deleted = upstream_prs("is:merged")
     open_repos, opened, _, _ = upstream_prs("is:open")
     # Lines of code: own repos plus upstream PRs that actually landed.
-    own = [own_repo_loc(repo["name"]) for repo in user["repositories"]["nodes"]]
-    if None in own:
-        # Stats not ready (common right after a push): keep the last totals.
-        old = json.loads((ROOT / "stats.json").read_text())
-        added, deleted = old.get("loc_added", added), old.get("loc_deleted", deleted)
-    else:
-        added += sum(a for a, _ in own)
-        deleted += sum(d for _, d in own)
+    for repo in user["repositories"]["nodes"]:
+        a, d = own_repo_loc(repo["name"], user["id"])
+        added, deleted = added + a, deleted + d
     return {
         "created": user["createdAt"],
         "repos": user["repositories"]["totalCount"],
